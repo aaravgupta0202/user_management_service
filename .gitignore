@@ -135,6 +135,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+uploads/
+Pipfile.lock/
 
 # Spyder project settings
 .spyderproject

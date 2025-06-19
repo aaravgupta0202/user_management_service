@@ -1,0 +1,14 @@
+{
+    "user_created": "User created successfully.",
+    "user_deleted": "User deleted successfully.",
+    "something_went_wrong": "Something went wrong!",
+    "no_data_found": "No data found.",
+    "user_updated": "User updated successfully.",
+    "user_found": "User found successfully.",
+    "user_list": "User list found successfully.",
+    "user_not_found": "User does not exist!",
+    "user_list_not_found": "User list not found!",
+    "user_exists": "User already exists!",
+    "user_login": "User logged in successfully.",
+    "wrong_pass": "Wrong password!"
+  }

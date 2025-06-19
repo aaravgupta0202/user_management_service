@@ -1,0 +1,26 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+python-dotenv = "*"
+fastapi = "*"
+uvicorn = "*"
+passlib = "*"
+bcrypt = "*"
+pymysql = "*"
+fastapi-pagination = "*"
+fastapi-mail = "*"
+sqlalchemy = "<2"
+pyjwt = "*"
+pydantic = "==1.10.1"
+Pillow = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
+
+[scripts]
+main = "python main.py"
