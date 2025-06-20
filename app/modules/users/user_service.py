@@ -15,6 +15,7 @@ from fastapi_pagination import Params
 from app.helper.general_helper import GeneralHelper
 import base64
 from datetime import datetime
+from app.models.user_has_roles_model import UserHasRoles
 
 class UserService :
     def list(params: Params = Depends(), search_string: Optional[str] = None, sort_by: Optional[str] = None, sort_direction: Optional[str] = None, db: Session = Depends(getDb)):
@@ -47,11 +48,14 @@ class UserService :
 
     def show(id: int, db: Session = Depends(getDb)):
         try:
-            user = db.query(User).options(load_only(User.name, User.surname, User.email, User.mobile_no, User.city, User.state, User.country)).filter(User.id == id, User.deleted_at == None).first()
-            if not user:
-                return None
+            user = db.query(User).options(load_only(User.name, User.surname, User.email, User.mobile_no, User.city, User.state, User.country, User.profile_image)).filter(User.id == id, User.deleted_at == None).first()
             
-            return user.__dict__
+            if user:
+                if user.profile_image is not None and os.getenv('BASE_URL') not in user.profile_image:
+                    user.profile_image = os.path.join(os.getenv('BASE_URL'), user.profile_image) if user.profile_image else None
+                return user.__dict__
+            
+            return None
         
         except Exception as e:
             traceback_str = traceback.format_exc()
@@ -67,12 +71,14 @@ class UserService :
 
             if check_user is not None:
                 return False    
+            img = GeneralHelper.UploadImage(request.profile_image)
+            print("==========img=======", img)
             user = User(
                 name = request.name,
                 surname = request.surname,
                 email = request.email,
                 password = hash_(request.password),
-                profile_image = GeneralHelper.UploadImage(request.profile_image),
+                profile_image = img,
                 mobile_no = request.mobile_no,
                 city = request.city,
                 state = request.state,
@@ -81,11 +87,21 @@ class UserService :
             db.add(user)
             db.commit()
             db.refresh(user)
+            user.__dict__.pop("password")
+            
+            user_has_role = UserHasRoles(
+                user_id = user.id,
+                role_id = 2  # Default to role_id 1 if not provided
+            )
+
+            db.add(user_has_role)
+            db.commit()
+            db.refresh(user_has_role)
 
             # GeneralHelper.send_email("nirbhay.verve@gmail.com", "xdjexcbtyvgkfdlu", request.email, "ACCOUNT MADE!", f"Congratulations {request.name} {request.surname}! You account has been made!", smtp_server='smtp.gmail.com', smtp_port=465)
             background_tasks.add_task(GeneralHelper.send_email, request.name, request.surname, request.email, background_tasks)
         
-            user.__dict__.pop("password")
+            db.refresh(user)
             return user.__dict__
         
         except Exception as e:

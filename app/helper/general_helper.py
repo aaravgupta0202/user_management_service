@@ -182,8 +182,9 @@ class GeneralHelper:
         # If it includes a data URI prefix like 'data:image/png;base64,...', strip it
         if base64_string:
             output_dir = os.path.join(os.getcwd(), "uploads")
-
-            if not os.path.exists(output_dir):
+            print("===========output_path=========", output_dir)
+            if os.path.exists(output_dir):
+                print("===========output_path=========", output_dir)
                 # Strip Data URI prefix if present
                 if base64_string.startswith("data:image"):
                     base64_string = base64_string.split(",")[1]
@@ -204,11 +205,12 @@ class GeneralHelper:
                 timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
                 filename = f"{timestamp}.{extension}"
                 output_dir = os.path.join(os.getcwd(), "uploads")
+                print("===========output_path=========", output_dir)
                 os.makedirs(output_dir, exist_ok=True)
                 os.chmod(output_dir, 0o777)  # Set permissions to allow writing
                 
                 output_path = os.path.join(output_dir, filename)
-
+                
                 # Save the image
                 with open(output_path, "wb") as file:
                     file.write(base64.b64decode(base64_string))

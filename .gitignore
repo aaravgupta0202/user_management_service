@@ -136,7 +136,8 @@ ENV/
 env.bak/
 venv.bak/
 uploads/
-Pipfile.lock/
+Pipfile.lock
+saved_images/
 
 # Spyder project settings
 .spyderproject

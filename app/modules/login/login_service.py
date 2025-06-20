@@ -1,3 +1,4 @@
+import os
 import traceback
 from fastapi import Depends
 from app.hashing.hashing import verify_password
@@ -27,6 +28,8 @@ class LoginService:
                     token = create_access_token(user_id = check_user.id,email=check_user.email)
                     check_user.__dict__["access_token"] = token["access_token"]
 
+                    if check_user.profile_image is not None and os.getenv('BASE_URL') not in check_user.profile_image:
+                        check_user.profile_image = os.path.join(os.getenv('BASE_URL'), check_user.profile_image) if check_user.profile_image else None
 
                     roles_list = db.query(UserHasRoles).filter(UserHasRoles.user_id == check_user.id).all()
                     role_ids_list = []
