@@ -1,5 +1,7 @@
 from typing import Optional
-from fastapi import APIRouter, BackgroundTasks
+from typing_extensions import Annotated
+from fastapi import APIRouter, BackgroundTasks, File, UploadFile
+from fastapi.params import Form
 from app.auth.auth_bearer import JWTBearer
 from config.database import getDb
 from sqlalchemy.orm import Session
@@ -34,6 +36,14 @@ def user_create(background_tasks: BackgroundTasks, request: user_schema.User, db
     if user_create is not None and type(user_create) == dict:
         return ResponseSchema(status=True, response=msg["user_created"],data=user_create)
     elif user_create is False:
+        return ResponseSchema(status=False, response=msg["user_exists"],data=None)
+    
+@router.post('/create_with_formdata', summary="Create new user with form data")
+def user_create_with_formdata(background_tasks: BackgroundTasks, picture: UploadFile = File(None), name: str = Form(), surname: str = Form(), email: str = Form(), password: str = Form(), mobile_no: str = Form(), city: str = Form(), state: str = Form(), country: str = Form(), db: Session = Depends(getDb)):
+    user_create_with_formdata = UserService.create_formdata(picture = picture, name = name, surname = surname, email = email, password = password, mobile_no = mobile_no, city = city, state = state, country = country, db = db, background_tasks = background_tasks)
+    if user_create_with_formdata is not None and type(user_create_with_formdata) == dict:
+        return ResponseSchema(status=True, response=msg["user_created"],data=user_create_with_formdata)
+    elif user_create_with_formdata is False:
         return ResponseSchema(status=False, response=msg["user_exists"],data=None)
 
 @router.put('/update/{id}', summary="Update user", dependencies = [Depends(JWTBearer())])

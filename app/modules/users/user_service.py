@@ -2,7 +2,7 @@ from operator import or_
 import os
 import traceback
 from typing import Optional
-from fastapi import BackgroundTasks, Depends
+from fastapi import BackgroundTasks, Depends, File, Form, UploadFile
 from app.schemas import user_schema
 from app.models.user_model import User
 from config.database import engine
@@ -71,8 +71,7 @@ class UserService :
 
             if check_user is not None:
                 return False    
-            img = GeneralHelper.UploadImage(request.profile_image)
-            print("==========img=======", img)
+            img = GeneralHelper.UploadImageBase64(request.profile_image)
             user = User(
                 name = request.name,
                 surname = request.surname,
@@ -87,7 +86,6 @@ class UserService :
             db.add(user)
             db.commit()
             db.refresh(user)
-            user.__dict__.pop("password")
             
             user_has_role = UserHasRoles(
                 user_id = user.id,
@@ -102,6 +100,60 @@ class UserService :
             background_tasks.add_task(GeneralHelper.send_email, request.name, request.surname, request.email, background_tasks)
         
             db.refresh(user)
+            del user.password
+
+            return user.__dict__
+        
+        except Exception as e:
+            traceback_str = traceback.format_exc()
+            print(traceback_str)
+ 
+            line_no = traceback.extract_tb(e.__traceback__)[-1][1]
+            print(f"Exception occurred on line {line_no}")
+            return str(e)
+        
+    def create_formdata(background_tasks: BackgroundTasks, picture: UploadFile = File(None), name: str = Form(), surname: str = Form(), email: str = Form(), password: str = Form(), mobile_no: str = Form(), city: str = Form(), state: str = Form(), country: str = Form(), db: Session = Depends(getDb)):
+        try:
+            check_user = db.query(User).filter(User.email == email).first()
+            picture_path = None
+
+            if check_user is not None:
+                return False
+            if picture is not None:   
+                picture_path = GeneralHelper.UploadImage(picture)
+            
+     
+            user = User(
+                name = name,
+                surname = surname,
+                email = email,
+                password = hash_(password),
+                profile_image = picture_path,
+                mobile_no = mobile_no,
+                city = city,
+                state = state,
+                country = country)
+
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            
+            user_has_role = UserHasRoles(
+                user_id = user.id,
+                role_id = 2  # Default to role_id 1 if not provided
+            )
+
+            db.add(user_has_role)
+            db.commit()
+            db.refresh(user_has_role)
+
+            # GeneralHelper.send_email("nirbhay.verve@gmail.com", "xdjexcbtyvgkfdlu", request.email, "ACCOUNT MADE!", f"Congratulations {request.name} {request.surname}! You account has been made!", smtp_server='smtp.gmail.com', smtp_port=465)
+            background_tasks.add_task(GeneralHelper.send_email, name, surname, email, background_tasks)
+        
+            db.refresh(user)
+
+            del user.password
+            user.profile_image = os.path.join(os.getenv('BASE_URL'), user.profile_image) if user.profile_image else None
             return user.__dict__
         
         except Exception as e:

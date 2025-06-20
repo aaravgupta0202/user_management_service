@@ -16,6 +16,7 @@ sqlalchemy = "<2"
 pyjwt = "*"
 pydantic = "==1.10.1"
 Pillow = "*"
+python-multipart = "*"
 
 [dev-packages]
 

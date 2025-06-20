@@ -15,3 +15,17 @@ class User(BaseModel):
     class Config():
         orm_mode = True
 
+class UserFormData(BaseModel):
+    name: str
+    surname: str
+    email : str
+    password : str
+    profile_image: str
+    mobile_no : int
+    city: str
+    state: str
+    country: str    
+    
+    class Config():
+        orm_mode = True
+

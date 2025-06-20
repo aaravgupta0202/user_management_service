@@ -2,13 +2,14 @@ import base64
 from datetime import datetime
 import email
 import io
+import shutil
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import timezone
 from PIL import Image
 from typing import List
-from fastapi import BackgroundTasks
+from fastapi import BackgroundTasks, UploadFile
 from fastapi_mail import ConnectionConfig, MessageSchema, FastMail, MessageType
 from pydantic import BaseModel, EmailStr
 import os
@@ -178,13 +179,31 @@ class GeneralHelper:
         background_tasks.add_task(fm.send_message, message)
         return {"message": "Email has been sent"}
     
-    def UploadImage(base64_string):
+    def UploadImage(upload_file: UploadFile):
+        if upload_file:
+            output_dir = os.path.join(os.getcwd(), "uploads")
+            os.makedirs(output_dir, exist_ok=True)
+            os.chmod(output_dir, 0o777)
+
+            # Extract file extension
+            filename_ext = upload_file.filename.split('.')[-1]
+
+            # Generate a unique filename with timestamp
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+            filename = f"{timestamp}.{filename_ext}"
+            output_path = os.path.join(output_dir, filename)
+
+            # Save the file
+            with open(output_path, "wb") as buffer:
+                shutil.copyfileobj(upload_file.file, buffer)
+            path = os.path.join("uploads", filename)
+            print("===========output_path=========", path)
+            return path  
+    def UploadImageBase64(base64_string):
         # If it includes a data URI prefix like 'data:image/png;base64,...', strip it
         if base64_string:
             output_dir = os.path.join(os.getcwd(), "uploads")
-            print("===========output_path=========", output_dir)
             if os.path.exists(output_dir):
-                print("===========output_path=========", output_dir)
                 # Strip Data URI prefix if present
                 if base64_string.startswith("data:image"):
                     base64_string = base64_string.split(",")[1]
