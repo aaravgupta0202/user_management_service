@@ -12,13 +12,12 @@ from config.database import engine
 from config.database import getDb
 from sqlalchemy.orm import Session, load_only
 from sqlalchemy import func
-from app.hashing.hashing import hash_
 from app.auth.auth_handler import create_access_token
 
 class LoginService:
     def login(request: UserLogin, db: Session = Depends(getDb)):
             try:
-                check_user = db.query(User).filter(User.email == request.email).first()
+                check_user = db.query(User).filter(User.email == request.email, User.deleted_at == None).first()
                 if not check_user:
                     return None
                 if not verify_password(request.password, check_user.password):
@@ -35,7 +34,6 @@ class LoginService:
                     role_ids_list = []
                     for i in roles_list:
                         role_ids_list.append(i.role_id)
-                    print("===role_ids_list====", role_ids_list)
 
                     roles = db.query(Roles).options(load_only(Roles.role)).filter(Roles.id.in_(role_ids_list)).all()
                     roles_list = []
@@ -45,45 +43,17 @@ class LoginService:
                         roles_names.append(i.role)
                         
                     permissions = db.query(RoleHasPermissions).with_entities(func.group_concat(func.distinct(Permissions.id))).join(RoleHasPermissions.permission).filter(RoleHasPermissions.role_id.in_(roles_list)).scalar()
-                    print("===permissions====", permissions)
 
                     unique_permissions = permissions.split(",") if permissions is not None else None
 
                     permission_names = db.query(Permissions.permission_name).filter(Permissions.id.in_(unique_permissions)).all()
-                    print("===permission_names====", permission_names)
 
                     all_permissions = []
                     for permission_name in permission_names:
                         all_permissions.append(permission_name[0])
 
-                    print("===all_permissions====", all_permissions)
-
                     check_user.__dict__["role"] = roles
                     check_user.__dict__["permissions"] = all_permissions
-
-                    # role_list = db.query(UserHasRoles).filter(UserHasRoles.user_id == check_user.id).all()
-                    # role_ids_list = []
-
-                    # for i in role_list:
-                    #     role_ids_list.append(i.role_id)
-                    # print("===role_ids_list====", role_ids_list)
-
-                    # roles = db.query(Roles).filter(Roles.id.in_([role_ids_list])).all()
-                    # roles_ids = []
-                    # for i in roles:
-                    #     print("================",i.id)
-                    #     roles_ids.append(i.id)
-                
-                         
-                    # permissions = db.query(RoleHasPermissions).filter(RoleHasPermissions.role_id.in_([roles_ids])).all()
-                    # permissions_list = []
-                    # for permission in permissions:
-                    #     permissions_list.append(permission.permission_id)
-                    # perm = db.query(Permissions).options(load_only(Permissions.permission_name)).filter(Permissions.id.in_(permissions_list)).all()
-                    # permission_names = [p.permission_name for p in perm]
-                    # print("===permission_names====", permission_names)
-                    # check_user.__dict__["role"] = roles
-                    # check_user.__dict__["permissions"] = permission_names
 
                     return check_user.__dict__
             

@@ -8,7 +8,7 @@ from config.database import engine
 from app.modules.users import user_route
 from app.modules.login import login_route
 
-app = FastAPI()
+app = FastAPI(docs_url="/")
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 

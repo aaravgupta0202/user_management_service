@@ -5,8 +5,6 @@ name = "pypi"
 
 [packages]
 python-dotenv = "*"
-fastapi = "*"
-uvicorn = "*"
 passlib = "*"
 bcrypt = "*"
 pymysql = "*"
@@ -17,6 +15,11 @@ pyjwt = "*"
 pydantic = "==1.10.1"
 Pillow = "*"
 python-multipart = "*"
+fastapi = "*"
+uvicorn = "*"
+mysql-connector-python = "*"
+pandas = "*"
+openpyxl = "*"
 
 [dev-packages]
 
