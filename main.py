@@ -7,6 +7,7 @@ from app.models import user_model
 from config.database import engine
 from app.modules.users import user_route
 from app.modules.login import login_route
+from app.modules.forgot_password import forgot_password_route
 
 app = FastAPI(docs_url="/")
 
@@ -16,6 +17,7 @@ user_model.Base.metadata.create_all(engine)
 
 app.include_router(login_route.router)
 app.include_router(user_route.router)
+app.include_router(forgot_password_route.router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

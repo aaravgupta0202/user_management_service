@@ -11,5 +11,10 @@
     "user_exists": "User already exists!",
     "user_login": "User logged in successfully.",
     "wrong_pass": "Wrong password!",
-    "not_auth": "You are not authorized to perform this action."
+    "not_auth": "You are not authorized to perform this action.",
+    "otp_sent": "An OTP has been sent to your email.",
+    "otp_verified": "Your OTP has been verified.",
+    "email_wrong": "Your submitted email is incorrect.",
+    "otp_wrong": "Your OTP is incorrect.",
+    "password_changed": "Your new password has been set."
   }

@@ -13,7 +13,7 @@ import jwt
 from app.auth.auth_handler import ALGORITHM, SECRET_KEY
 from app.auth.auth_handler import decodeJWT
 from app.models.user_model import User
-from app.templates import create_user_template
+from app.templates import create_user_template, otp_mail_template
 from app.templates import welcome_user_email
 import random
 import string
@@ -72,6 +72,34 @@ class GeneralHelper:
             body=body,
             subtype=MessageType.html,  # use MessageType.html for HTML emails
             attachments=[file_path]
+            )
+
+        fm = FastMail(conf)
+        background_tasks.add_task(fm.send_message, message)
+        return {"message": "Email has been sent"}
+    
+    def send_otp(name, surname, email, otp, background_tasks: BackgroundTasks):
+        conf = ConnectionConfig(
+            MAIL_USERNAME = "nirbhay.verve@gmail.com",
+            MAIL_PASSWORD = "xdjexcbtyvgkfdlu",
+            MAIL_FROM = "reverlogy@gmail.com",
+            MAIL_PORT = 465,
+            MAIL_SERVER = "smtp.gmail.com",
+            MAIL_FROM_NAME="Verve",
+            MAIL_STARTTLS=False,       # Correct field
+            MAIL_SSL_TLS=True,       # Correct field
+            USE_CREDENTIALS=True,
+            VALIDATE_CERTS=True
+            )
+
+        body =  Template(otp_mail_template.email).render(name = name, surname = surname, otp = otp)
+
+        message = MessageSchema(
+            subject= f"Hey {name}!",
+            recipients=[email],
+            body=body,
+            subtype=MessageType.html,  # use MessageType.html for HTML emails
+            attachments=[]
             )
 
         fm = FastMail(conf)
@@ -156,3 +184,9 @@ class GeneralHelper:
         except Exception as e:
             print(str(e))
             return False
+        
+    def generate_otp():
+        length = 6
+        characters = string.ascii_letters + string.digits
+        otp = ''.join(random.choice(characters) for i in range(length))
+        return otp
