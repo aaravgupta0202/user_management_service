@@ -10,6 +10,7 @@ from app.modules.login import login_route
 from app.modules.forgot_password import forgot_password_route
 
 app = FastAPI(docs_url="/")
+app = FastAPI(docs_url="/docs")
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
