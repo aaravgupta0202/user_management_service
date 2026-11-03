@@ -51,12 +51,12 @@ class GeneralHelper:
     
     def send_password_email(name, surname, password, email, background_tasks: BackgroundTasks):
         conf = ConnectionConfig(
-            MAIL_USERNAME = "nirbhay.verve@gmail.com",
-            MAIL_PASSWORD = "xdjexcbtyvgkfdlu",
-            MAIL_FROM = "reverlogy@gmail.com",
+            MAIL_USERNAME = "",
+            MAIL_PASSWORD = "",
+            MAIL_FROM = "",
             MAIL_PORT = 465,
             MAIL_SERVER = "smtp.gmail.com",
-            MAIL_FROM_NAME="Verve",
+            MAIL_FROM_NAME="",
             MAIL_STARTTLS=False,       # Correct field
             MAIL_SSL_TLS=True,       # Correct field
             USE_CREDENTIALS=True,
